@@ -482,6 +482,7 @@ function startApp(){
 function showApp(){
   document.getElementById('screen-setup').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
+  window.scrollTo(0,0);
   document.getElementById('sess-date').valueAsDate=new Date();
   updateWeek();renderExercises(currentDay);renderProgress();renderHistory();
 }
