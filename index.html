@@ -39,10 +39,10 @@ html{scroll-behavior:smooth;font-size:16px}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
 input,select,button,textarea{font-family:var(--sans);font-size:16px}
 ::-webkit-scrollbar{display:none}
-.screen{display:none;min-height:100vh}
-.screen.active{display:block}
-#screen-setup.active{display:flex}
-#screen-setup{position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:2rem 1.5rem;padding-top:calc(2rem + var(--safe-top))}
+.screen{display:block}
+#screen-setup{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;padding-top:calc(2rem + var(--safe-top))}
+#screen-setup.hidden{display:none}
+.setup-logo{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:6px}
 .setup-logo span{color:var(--accent)}
 .setup-sub{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:2.5rem;text-align:center}
 .setup-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:400px}
@@ -164,19 +164,8 @@ input,select,button,textarea{font-family:var(--sans);font-size:16px}
 </head>
 <body>
 
-<div id="screen-setup" class="screen active">
-  <div class="setup-logo">FORGE<span>.</span></div>
-  <div class="setup-sub">// your claude-powered strength coach</div>
-  <div class="setup-card">
-    <label class="field-label">Anthropic API Key</label>
-    <input type="password" class="field-input" id="api-key" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-    <div class="field-hint">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys. Stored on this device only.</div>
-    <button class="btn-big" onclick="startApp()">Start training</button>
-    <div class="setup-err" id="setup-err"></div>
-  </div>
-</div>
-
-<div id="screen-app" class="screen">
+<!-- APP screen is first in DOM so page always starts at top -->
+<div id="screen-app">
   <div class="topbar">
     <div class="tl">FORGE<span>.</span></div>
     <div class="tr">
@@ -242,6 +231,19 @@ input,select,button,textarea{font-family:var(--sans);font-size:16px}
   <div class="bottom-bar">
     <button class="btn-clr" onclick="clearAll()">Clear</button>
     <button class="btn-analyse" id="btn-analyse" onclick="analyseSession()">Analyse session →</button>
+  </div>
+</div>
+
+<!-- SETUP is a fixed overlay on top — hidden once key is entered -->
+<div id="screen-setup">
+  <div class="setup-logo">FORGE<span>.</span></div>
+  <div class="setup-sub">// your claude-powered strength coach</div>
+  <div class="setup-card">
+    <label class="field-label">Anthropic API Key</label>
+    <input type="password" class="field-input" id="api-key" placeholder="sk-ant-..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+    <div class="field-hint">Get your key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → API Keys. Stored on this device only.</div>
+    <button class="btn-big" onclick="startApp()">Start training</button>
+    <div class="setup-err" id="setup-err"></div>
   </div>
 </div>
 
@@ -476,13 +478,11 @@ function startApp(){
   if(!key.startsWith('sk-')){err.textContent='Key should start with sk-ant-';err.style.display='block';return;}
   localStorage.setItem('forge_key',key);
   err.style.display='none';
-  showApp();
+  hideSetup();
 }
 
-function showApp(){
-  document.getElementById('screen-setup').classList.remove('active');
-  document.getElementById('screen-app').classList.add('active');
-  window.scrollTo(0,0);
+function hideSetup(){
+  document.getElementById('screen-setup').style.display='none';
   document.getElementById('sess-date').valueAsDate=new Date();
   updateWeek();renderExercises(currentDay);renderProgress();renderHistory();
 }
@@ -671,7 +671,7 @@ function toast(msg,type=''){
 
 load();
 const savedKey=localStorage.getItem('forge_key');
-if(savedKey)showApp();
+if(savedKey){hideSetup();}
 </script>
 </body>
 </html>
